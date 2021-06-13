@@ -13,7 +13,7 @@ class AllLocation extends Model
 
     protected $fillable = [
 
-        'longitude', 'latitude', 'address', 'time_from', 'time_to',
+        'longitude', 'latitude', 'zip_code', 'address', 'time_from', 'time_to',
         'status', 'price',
     ];
 }

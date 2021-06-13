@@ -37,6 +37,8 @@ Route::group(['middleware' => 'auth:api'], function (){
     
 });
 
+
+
 Route::post('register_user', [UserController::class, 'register_user']);
 
 Route::post('login_user', [UserController::class, 'login_user']);
@@ -44,3 +46,17 @@ Route::post('login_user', [UserController::class, 'login_user']);
 Route::post('logout_user', [UserController::class, 'logout_user']);
 
 Route::post('nearby_locations', [UserController::class, 'nearby_locations']);
+
+Route::post('add_safe_location', [UserController::class, 'add_safe_location']);
+
+Route::post('fetch_safe_locations', [UserController::class, 'fetch_safe_locations']);
+
+Route::post('check_excluded_area', [UserController::class, 'check_excluded_area']); // sb se pele run hogi
+
+//details confirm hone k bad isko shertee
+
+Route::post('vehicle_information', [UserController::class, 'vehicle_information']); //not solid
+
+//add vehicle detail
+//update profile
+//update vehicle

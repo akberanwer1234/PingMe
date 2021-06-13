@@ -5,16 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SafeLocation extends Model
+class Excludedarea extends Model
 {
     use HasFactory;
 
-    // protected $table = "safe_locations";
+    // protected $table = "excludedareas";
 
     protected $fillable = [
 
-        'longitude', 'latitude', 'address', 'user_id', 'zip_code',
+        'zip_code',
     ];
 }
-
-

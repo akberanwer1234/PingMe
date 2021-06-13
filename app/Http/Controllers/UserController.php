@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\AllLocation;
+use App\Models\Excludedarea;
+use App\Models\SafeLocation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -166,6 +168,7 @@ class UserController extends Controller
 
             'longitude' => 'required',
             'latitude' => 'required',
+            'zip_code' => 'required',
 
         ]);
 
@@ -179,30 +182,175 @@ class UserController extends Controller
 
         } else {
 
-            $all_locations = AllLocation::all();
+            if (Excludedarea::where('zip_code', $req->zip_code)->exists()) {
 
-            $nearby_locations = [];
+                return response()->json([
+                    'status' => "error",
+                    'message' => "This are is prohibited due to zip code",
+                ], 404);                
 
-            foreach ( $all_locations as $nearby ) {
+            } else {
 
-                $distance = $this->circle_distance($nearby->latitude, $nearby->longitude, $req->latitude, $req->longitude);
+                $all_locations = AllLocation::where('zip_code', '<>', $req->zip_code)->get();
 
-                // die($distance);
+                $nearby_locations = [];
 
-                if ( $distance <= $this->radius ) {
+                foreach ( $all_locations as $nearby ) {
 
-                    array_push($nearby_locations, $nearby);
-                    
+                    $distance = $this->circle_distance($nearby->latitude, $nearby->longitude, $req->latitude, $req->longitude);
+
+                    // die($distance);
+
+                    if ( $distance <= $this->radius ) {
+
+                        array_push($nearby_locations, $nearby);
+                        
+                    }
                 }
+
+                return response()->json([
+                    'status' => "success",
+                    'message' => "Nearby Locations Fetched Successfully",
+                    'nearby_locations' => $nearby_locations,
+
+                ], 200);
+
             }
 
+        }
+
+    }
+
+    public function add_safe_location (Request $req) {
+
+        $validator = Validator::make($req->all(), [
+
+            'longitude' => 'required',
+            'latitude' => 'required',
+            'zip_code' => 'required',
+            'address' => 'required',
+            'user_id' => 'required',
+
+        ]);
+
+        if ( $validator->fails() ) {
+
             return response()->json([
-                'status' => "success",
-                'message' => "Nearby Locations Fetched Successfully",
-                'nearby_locations' => $nearby_locations,
+                'status' => "error",
+                'message' => "Validator Error",
+                'error' => $validator->errors(),
+            ], 400);
 
-            ], 200);
+        } else {
 
+            if (User::where('id', $req->user_id)->exists()) {
+
+                SafeLocation::insert([
+
+                    'longitude' => $req->longitude,
+                    'latitude' => $req->latitude,
+                    'address' => $req->address,
+                    'user_id' => $req->user_id,
+                ]);
+
+                return response()->json([
+                    'status' => "success",
+                    'message' => "Safe Location Added Successfully",
+    
+                ], 200);
+
+            } else {
+
+                return response()->json([
+                    'status' => "error",
+                    'message' => "User does not Exists",
+    
+                ], 404);
+
+            }
+
+        }
+
+    }
+
+    public function fetch_save_location (Request $req) {
+
+        $validator = Validator::make($req->all(), [
+
+            'user_id' => 'required',
+
+        ]);
+
+        if ( $validator->fails() ) {
+
+            return response()->json([
+                'status' => "error",
+                'message' => "Validator Error",
+                'error' => $validator->errors(),
+            ], 400);
+
+        } else {
+
+            if (SafeLocation::where('user_id', $req->user_id)->exists()) {
+
+                $safe_locations = SafeLocation::where('user_id', $req->user_id)->get();
+
+                return response()->json([
+                    'status' => "success",
+                    'message' => "Your safe locations fetched successfully",
+                    'safe_locations' => $safe_locations,
+    
+                ], 200);
+
+
+            } else {
+
+                return response()->json([
+                    'status' => "error",
+                    'message' => "You have no safe locations",
+    
+                ], 200);
+
+            }
+        }
+    }
+
+
+    public function check_excluded_area (Request $req) {
+
+        $validator = Validator::make($req->all(), [
+
+            'zip_code' => 'required',
+
+        ]);
+
+        if ( $validator->fails() ) {
+
+            return response()->json([
+                'status' => "error",
+                'message' => "Validator Error",
+                'error' => $validator->errors(),
+            ], 400);
+
+        } else {
+
+            if (Excludedarea::where('zip_code', $req->zip_code)->exists()) {
+
+                return response()->json([
+                    'status' => "error",
+                    'message' => "Our service is not available for this area at this moment",
+    
+                ], 200);
+
+            } else {
+
+                return response()->json([
+                    'status' => "success",
+                    'message' => "Congrats! Our service is available for this area",
+    
+                ], 200);
+
+            }
         }
 
     }

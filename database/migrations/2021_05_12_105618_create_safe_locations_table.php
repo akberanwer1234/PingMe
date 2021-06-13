@@ -17,6 +17,7 @@ class CreateSafeLocationsTable extends Migration
             $table->id();
             $table->string('longitude')->nullable();
             $table->string('latitude')->nullable();
+            $table->string('zip_code')->nullable();
             $table->string('address')->nullable();
             $table->unSignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')

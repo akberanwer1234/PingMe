@@ -17,6 +17,7 @@ class CreateAllLocationsTable extends Migration
             $table->id();
             $table->string('longitude')->nullable();
             $table->string('latitude')->nullable();
+            $table->string('zip_code')->nullable();
             $table->string('address')->nullable();
             $table->string('time_from')->nullable();
             $table->string('time_to')->nullable();
